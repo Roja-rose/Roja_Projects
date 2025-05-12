@@ -1,0 +1,174 @@
+import sys
+from student import student
+from password import password
+
+#create "password" class
+class password:
+    def __init__(self):
+        self.no=None
+
+    def getpw(self):
+            print("Password Requirements: \nAtleast 10 characters \nAtleast one uppercase \nAtleast 2 to 3 numbers \nAtleast 1 special character")
+            self.pw=str(input("ENTER LOGIN PASSWORD: "))
+
+    def validpw(self):
+        upper=0
+        num=0
+        spl=0
+        for i in self.pw:
+            if i.isupper():
+                upper += 1
+            if i.isdigit():
+                num +=1
+            if not i.isalnum():
+                spl +=1
+        
+        if len(self.pw)>=10 and upper>=1 and spl>=1 and num in(2,3):
+            return True
+
+        else:
+            return False
+
+#create "student" class
+class student:
+    def __init__(self):
+        self.no=None
+
+    def name(self):
+        n=str(input("Enter name of STUDENT: "))
+        return n
+    
+    def getscore(self):
+        self.m=float(input("Enter Math score of STUDENT(Credit hours=4): "))
+        self.s=float(input("Enter Science score of STUDENT(Credit hours=5): "))
+        self.l=float(input("Enter Language score of STUDENT(Credit hours=4): "))
+        self.d=float(input("Enter Drama score of STUDENT(Credit hours=3): "))
+        self.mu=float(input("Enter Music score of STUDENT(Credit hours=2): "))
+        self.b=float(input("Enter Biology score of STUDENT(Credit hours=4): "))
+        return self.m,self.s,self.l,self.d,self.mu,self.b
+
+    def setgpa(self):
+        wsum=self.m*4 + self.s*5 + self.l*4 + self.d*3 + self.mu*2 + self.b*4
+        totalcredits=22
+        self.gpa=wsum/totalcredits
+        return self.gpa
+
+    def setschool(self):
+        if 90 <= self.gpa <=100:
+            sch="School of engineering"
+        elif 80<= self.gpa <90:
+            sch="School of business"
+        elif 70 <= self.gpa <80:
+            sch="School of law"
+        else:
+            sch="Rejected"
+        return sch
+
+#STEP1:welcome message
+print("                      Welcome to Humber College")
+print()
+
+#STEP2:password input and check
+attempt=3
+while 1<=attempt<=3:
+    print()
+    passw=password()
+    passw.getpw()
+    passw.validpw()
+    if passw.validpw():
+        print("Login Successful")
+        print()
+        break
+    else:
+        print("Invalid password, Try again \nWarning!Attempts left: ",attempt-1)
+        attempt -=1
+if attempt<1:
+    print("Sorry,no more attempts possible")
+    sys.exit()
+
+#STEP3:enter number of students
+def main():
+    attempt=1
+    while attempt<=3:
+        stu=int(input("Warning! Only three attempts in total possible \nEnter number of students(Between 1 to 50): "))
+        if not 1<=stu<=50:
+            print("Invalid input")
+            print()
+            attempt +=1
+        else:
+            print()
+            break
+    if attempt>3:
+        print("Sorry,No more attempts possible")
+        sys.exit()
+
+#STEP4:enter names,scores of students and calculate gpa
+    nam=[]
+    tscore=[]
+    schl=[]
+    print()
+    for i in range(0,stu):
+        apply=student()
+        nam.append(apply.name())
+        apply.getscore()
+        tscore.append(apply.setgpa())
+        schl.append(apply.setschool())
+        print()
+    print()
+
+#STEP5:print report 1
+    print("Report 1")
+    print(format("Student name",'25s'),end=" ")
+    print(format("School Name",'25s'))
+    for i in range(len(nam)):
+        print(format(nam[i],'25s'),end=" ")
+        print(format(schl[i],'25s'))
+    print()
+
+#STEP6:print report 2&3
+    count=0
+    for i in range(len(schl)):
+        if schl[i] not in("Rejected"):
+            count +=1
+    eng=schl.count("School of engineering")
+    bus=schl.count("School of business")
+    law=schl.count("School of law")
+    rej=schl.count("Rejected")
+    print("Report 2")
+    print("Total number of students accepted to Humber College is: ",count)
+    print("Total number of students accepted into School of engineering  is: ",eng)
+    print("Total number of students accepted into School of business is: ",bus)
+    print("Total number of students accepted into School of law is: ",law)
+    print()
+    print("Report 3")
+    print("Total number of students rejected by Humber College is: ",rej)
+    print()
+
+#STEP7:print report 4
+    sumeng=0
+    sumbus=0
+    sumlaw=0
+    for i in range(len(schl)):
+        if schl[i] in("School of engineering"):
+            sumeng +=tscore[i]
+        elif schl[i] in("School of business"):
+            sumbus +=tscore[i]
+        elif schl[i] in("School of law"):
+            sumlaw +=tscore[i]
+    print("Report 4")
+    if eng!=0:
+        print("Average GPA of School of engineering is: ",sumeng/eng)
+    else:
+        print("No students admitted in School of engineering")
+    if bus!=0:
+        print("Average GPA of School of business is: ",sumbus/bus)
+    else:
+        print("No students admitted in School of business")
+    if law!=0:
+        print("Average GPA of School of law is: ",sumlaw/law)
+    else:
+        print("No students admitted in School of law")
+    
+main()
+print()
+print("THE END \nThank you for your input!")
