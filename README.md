@@ -1,2 +1,0 @@
-# capstone
-#data analyst project
