@@ -1,0 +1,278 @@
+#install required packages
+library(readxl)
+library(plotly)
+library(tidyr)
+library(dplyr)
+
+# Load the data Perceived Health file (Health Category - Perceived Health Indicator)
+df_health <- read_excel("BigData_Data.xlsx",sheet=1)
+
+# Inspect the data
+head(df_health)
+str(df_health)
+summary(df_health)
+
+#Rename required columns
+colnames(df_health) <- c("year","number_of_people")
+df_health
+
+# Table description
+# year: The year of the survey.
+# number_of_people: No of respondents who perceive their health as very good or excellent across Canada
+
+#Check for missing values
+cat("--- Missing Values in PercievedHealth.xlsx ---\n")
+print(colSums(is.na(df_health)))
+cat("Any NA in PercievedHealth:", anyNA(df_health), "\n\n")
+
+#*****************************************************************************#
+#Load data DrinkingWaterAdv (Environment Category - Drinking Water Indicator)
+df_water <- read_excel("BigData_Data.xlsx",sheet=2)
+
+#Inspect the data
+head(df_water)
+str(df_water)
+summary(df_water)
+
+# Rename columns for easier use 
+colnames(df_water) <- c("year", "number_of_advisories")
+df_water
+
+#Table descriptions
+#year: The year of the survey
+#number_of_advisories: set of warnings issued by the Canadian government regarding the drinking water quality
+
+#Check missing values
+cat("--- Missing Values in DrinkingWaterAdv.xlsx ---\n")
+print(colSums(is.na(df_water)))
+cat("Any NA in DrinkingWaterAdv:", anyNA(df_water), "\n\n")
+
+#***********************************************************************#
+#Load the data HouseHoldIncome (Prosperity Category - Household Income Indicator)
+df_income <- read_excel("BigData_Data.xlsx",sheet=3)
+
+# Inspect the data
+head(df_income)
+str(df_income)
+summary(df_income)
+
+# Rename columns for easier use
+colnames(df_income) <- c("year","after_tax_income_cad")
+df_income
+
+#Table description
+#year: The year of the survey.
+#after_tax_income_cad: the annual after tax income for household in Canadian dollars across Canada
+
+#Check missing values
+cat("--- Missing Values in HouseHoldIncome.xlsx ---\n")
+print(colSums(is.na(df_income)))
+cat("Any NA in HouseHoldIncome:", anyNA(df_income), "\n\n")
+
+#***********************************************************************#
+#Load data ConfidenceInCanadianInstitutes.xlsx (Good Governance Category - Confidence in Canadian Institutions Indicator)
+df_confidence <- read_excel("BigData_Data.xlsx",sheet = 4)
+
+# Inspect the data
+head(df_confidence)
+str(df_confidence)
+summary(df_confidence)
+
+# Rename columns for easier use 
+colnames(df_confidence) <- c("year", "age_group_yrs", "confidence_police_perc", "confidence_justice_perc", "confidence_edu_perc")
+df_confidence
+
+# Table descriptions
+# year: The year of the survey.
+# age_group_yrs: The age group of the respondents 
+# confidence_police_perc: Percentage of respondents confident in the police across Canada
+# confidence_justice_perc: Percentage of respondents confident in the justice system across Canada
+# confidence_edu_perc: Percentage of respondents confident in the education system across Canada
+
+#Check missing values
+cat("--- Missing Values in ConfidenceInCanadianInstitutes.xlsx ---\n")
+print(colSums(is.na(df_confidence)))
+cat("Any NA in ConfidenceInCanadianInstitutes:", anyNA(df_confidence), "\n\n")
+
+# Addressing inconsistencies in 'age_group_yrs' (check unique values)
+unique(df_confidence$age_group_yrs)
+
+#******************************************************************#
+#Load data SenseOfBelonging (Society Category - Sense Of Belonging Indicator)
+df_belonging <- read_excel("BigData_Data.xlsx",sheet = 5)
+
+# Inspect the data
+head(df_belonging)
+str(df_belonging)
+summary(df_belonging)
+
+# Rename columns for easier use (optional, adjust as needed)
+colnames(df_belonging) <- c("year","percent_of_people","sense_of_belonging")
+df_belonging 
+
+#Table descriptions
+#year: The year of the survey.
+#percent_of_people: percentage of respondents across Canada
+#sense_of_belonging:levels indicating very strong,very weak or No opinion on sense of belonging 
+
+#Check Missing values
+cat("--- Missing Values in SenseOfBelonging.xlsx ---\n")
+print(colSums(is.na(df_belonging)))
+cat("Any NA in SenseOfBelonging:", anyNA(df_belonging), "\n\n")
+
+#check unique values in  'sense_of_belonging'
+unique(df_belonging$sense_of_belonging)
+
+#******************************************************************#
+#Building visualizations
+the_palette <- c(
+  "#9B59B6",  # Royal Purple
+  "#5DADE2",  # Sky Blue
+  "#F8C8DC",  # Blush Pink
+  "#AF7AC5",  # Soft Orchid
+  "#2980B9",  # Deep Ocean Blue
+  "#E8A0BF",  # Dusty Rose
+  "#D2B4DE",  # Lavender Mist
+  "#AED6F1",  # Powder Blue
+  "#F4A3C3"   # Muted Pink
+)
+
+#Health Category - Perceived Health Indicator
+# Calculate year-over-year changes
+df_health$change <- c(df_health$number_of_people[1], diff(df_health$number_of_people))
+
+# Define measure type: first is absolute, rest are relative
+measures <- c("absolute", rep("relative", nrow(df_health) - 1))
+
+# Create the waterfall chart
+fig <- plot_ly(
+  data = df_health,
+  type = "waterfall",
+  x = ~year,
+  y = ~change,
+  text = ~format(change, big.mark = ","),     
+  textposition = "outside",                  
+  measure = measures,
+  connector = list(line = list(color = "gray")),
+  decreasing = list(marker = list(color = "#9B59B6")),
+  increasing = list(marker = list(color = "#5DADE2")),
+  totals = list(marker = list(color = "#F8C8DC"))
+) %>%
+  layout(
+    title = "Change in number of respondents with good health (2019–2023) in Canada",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Number of respondents with good health"),
+    waterfallgroupgap = 0.5
+  )
+
+# Show the chart
+fig
+
+#Environment Category - Drinking Water Indicator
+# Create the bar chart
+plot_ly(
+  data = df_water,
+  x = ~year,
+  y = ~number_of_advisories,
+  type = "bar",
+  text = ~number_of_advisories,
+  textposition = "outside",
+  marker = list(color = c("#9B59B6","#5DADE2","#E8A0BF","#D2B4DE","#F8C8DC")),
+  showlegend = FALSE
+) %>%
+  layout(
+    title = "Number of Advisories in Canada (2019–2023)",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Number of Advisories"),
+    uniformtext = list(minsize = 10, mode = "hide"),
+    showlegend = FALSE
+  )
+
+#Prosperity Category - Household Income Indicator
+# Create the line chart
+plot_ly(
+  data = df_income,
+  x = ~year,
+  y = ~after_tax_income_cad,
+  type = 'scatter',
+  mode = 'lines+markers+text',  # <-- Add 'text' here
+  text = ~paste0("$", format(after_tax_income_cad, big.mark = ",")),
+  textposition = 'top center',  # <- Position of labels
+  hoverinfo = 'text',
+  line = list(color = '#9B59B6', width = 3),
+  marker = list(color = "#2980B9", size = 8)
+) %>%
+  layout(
+    title = "After-Tax Income in CAD in Canada (2019–2023)",
+    xaxis = list(title = "Year", dtick = 1),
+    yaxis = list(title = "After-Tax Income (CAD)", tickprefix = "$"),
+    hovermode = "closest"
+  )
+
+#Good Governance Category - Confidence in Canadian Institutions Indicator
+#Reshaping data to long format
+plot_ly(
+  data = df_confidence_reshape,
+  x = ~year_age,
+  y = ~Confidence,
+  color = ~System,
+  colors = the_palette,
+  type = 'bar',
+  text = ~paste0(Confidence, "%"),   # <- Add data label text
+  textposition = "outside"           # <- Place labels above the bars
+) %>%
+  layout(
+    barmode = 'group',
+    title = "Confidence in Canadian Institutions among respondents by Age Group and Year (2022–2023)",
+    xaxis = list(title = "Year and Age Group", tickangle = -45),
+    yaxis = list(title = "Confidence (%)"),
+    uniformtext = list(minsize = 8, mode = "hide"),  # optional: helps clean up overlapping text
+    legend = list(title = list(text = "System"))
+  )
+
+#Society Category - Sense Of Belonging Indicator
+# Create pie chart for 2021
+pie_2021 <- plot_ly(
+  df_belonging %>% filter(year == 2021),
+  labels = ~sense_of_belonging,
+  values = ~percent_of_people,
+  type = 'pie',
+  name = "2021",
+  textinfo = 'label+percent',
+  domain = list(x = c(0, 0.5), y = c(0.5, 1)),
+  title = list(text = "2021"),
+  marker = list(colors = the_palette)
+)
+
+# Create pie chart for 2022
+pie_2022 <- plot_ly(
+  df_belonging %>% filter(year == 2022),
+  labels = ~sense_of_belonging,
+  values = ~percent_of_people,
+  type = 'pie',
+  name = "2022",
+  textinfo = 'label+percent',
+  domain = list(x = c(0.5, 1), y = c(0.5, 1)),
+  title = list(text = "2022"),
+  marker = list(colors = the_palette)
+)
+
+# Create pie chart for 2023
+pie_2023 <- plot_ly(
+  df_belonging %>% filter(year == 2023),
+  labels = ~sense_of_belonging,
+  values = ~percent_of_people,
+  type = 'pie',
+  name = "2023",
+  textinfo = 'label+percent',
+  domain = list(x = c(0.25, 0.75), y = c(0, 0.5)),
+  title = list(text = "2023"),
+  marker = list(colors = the_palette)
+)
+
+# Combine all three
+subplot(pie_2021, pie_2022, pie_2023) %>%
+  layout(
+    title = "Sense of Belonging among respondents in Canada (2021–2023)",
+    showlegend = TRUE
+  )
